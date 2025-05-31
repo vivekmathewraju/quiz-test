@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Readiness Assessment Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter as a common professional font */
+        }
+        .sdi-dark-blue { background-color: #051C3A; }
+        .sdi-red { background-color: #ED1741; }
+        .sdi-light-gray { background-color: #EFF2F4; }
+        .text-sdi-dark-blue { color: #051C3A; }
+        .text-sdi-red { color: #ED1741; }
+        .border-sdi-red { border-color: #ED1741; }
+
+        .option-button {
+            transition: all 0.3s ease;
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .option-button.selected {
+            background-color: #051C3A; /* SDI Dark Blue */
+            color: white;
+            border-color: #051C3A;
+        }
+        .progress-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+         /* Custom modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .modal-button {
+            background-color: #051C3A;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body class="sdi-light-gray min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="quiz-container" class="bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-2xl">
+        <header class="mb-6 text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-sdi-dark-blue">AI Readiness Assessment</h1>
+            <p class="text-sm text-gray-600 mt-1">Based on The Global Best Practice Standard for Service Desk v9 - Concept 10</p>
+        </header>
+
+        <div id="quiz-area">
+            <div class="mb-6">
+                <div class="flex justify-between mb-1">
+                    <span id="question-counter" class="text-sm font-medium text-sdi-dark-blue">Question 1 of 12</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar-fill" class="sdi-red h-2.5 rounded-full progress-bar-fill" style="width: 8.33%"></div>
+                </div>
+            </div>
+
+            <div id="question-section" class="mb-6">
+                <h2 id="question-text" class="text-lg sm:text-xl font-semibold text-sdi-dark-blue mb-2">Question text loading...</h2>
+                <p id="question-hint" class="text-xs sm:text-sm text-gray-500 italic">Hint loading...</p>
+            </div>
+
+            <div id="options-container" class="space-y-3">
+                </div>
+
+            <div class="mt-8 flex justify-between items-center">
+                <button id="prev-btn" class="sdi-dark-blue text-white py-2 px-4 sm:px-6 rounded-md hover:bg-opacity-90 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <button id="next-btn" class="sdi-red text-white py-2 px-4 sm:px-6 rounded-md hover:bg-opacity-90 transition duration-150">Next</button>
+            </div>
+        </div>
+
+        <div id="results-area" class="hidden text-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-sdi-dark-blue mb-4">Your Assessment Results</h2>
+            <div id="overall-rating-container" class="bg-sdi-light-gray p-6 rounded-lg mb-6">
+                <p class="text-lg text-sdi-dark-blue">Your Organisation's Overall AI Readiness Maturity:</p>
+                <p id="overall-rating" class="text-xl sm:text-2xl font-bold text-sdi-red mt-1">Calculating...</p>
+            </div>
+            <div id="rating-explanation-container" class="mb-6 text-left">
+                 <p id="rating-explanation" class="text-gray-700 text-sm sm:text-base">Explanation loading...</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm text-gray-600 mb-2">To explore all concepts and deepen your understanding:</p>
+                    <a href="https://www.servicedeskinstitute.com/resources/global-best-practice-standard-for-service-desk-v9/" target="_blank" rel="noopener noreferrer" class="sdi-dark-blue text-white py-2.5 px-5 rounded-md inline-block hover:bg-opacity-90 transition duration-150 text-sm sm:text-base">
+                        Download the Full Standard
+                    </a>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 mb-2">To discuss your AI readiness and explore how to advance your maturity:</p>
+                    <button id="contact-consultant-btn" class="sdi-red text-white py-2.5 px-5 rounded-md inline-block hover:bg-opacity-90 transition duration-150 text-sm sm:text-base">
+                        Contact a Consultant
+                    </button>
+                    <p id="contact-info" class="text-xs text-gray-500 mt-1 hidden"> (This would typically link to a contact page or booking system) </p>
+                </div>
+            </div>
+             <button id="restart-btn" class="mt-8 sdi-dark-blue text-white py-2 px-6 rounded-md hover:bg-opacity-90 transition duration-150">Restart Quiz</button>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal">
+        <div class="modal-content">
+            <p id="alertMessage" class="text-lg text-sdi-dark-blue"></p>
+            <button id="alertOkButton" class="modal-button">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Regarding AI Strategy and Objectives (10.1), which statement best describes your organisation's current maturity level for AI adoption?",
+                hint: "Consider how formally your AI strategy is defined, documented, owned, and aligned with broader business and IT goals.",
+                options: [
+                    { text: "AI adoption occurs opportunistically without structured objectives or alignment to business and IT service needs, leading to inconsistent or siloed implementations.", rating: "Reactive" },
+                    { text: "There is a documented and owned AI strategy in place that includes defined purpose, feasibility, scope, goals, and objectives for AI initiatives. AI objectives are linked to specific ITSM or service goals.", rating: "Proactive" },
+                    { text: "AI goals are refined through stakeholder engagement including regular meetings, end user feedback, impact assessments, and dashboards tracking real world performance against business goals.", rating: "Customer-led" },
+                    { text: "The AI strategy is fully embedded into long term IT and business strategy, ensuring continuous optimisation and alignment with enterprise goals. These include periodic AI performance reviews, AI driven business transformation plans, and clear return on investment (ROI) tracking.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Governance and Compliance (10.2), which statement best describes your organisation's current maturity level?",
+                hint: "Reflect on the structural framework for overseeing AI, adherence to standards, and accountability mechanisms.",
+                options: [
+                    { text: "Governance for AI is informal and unstructured, with no established framework. Roles and responsibilities for developing, deploying, and overseeing AI are undefined, and compliance is managed reactively.", rating: "Reactive" },
+                    { text: "There is a documented and owned AI governance framework that defines roles, responsibilities, and compliance policies for AI oversight, ensuring alignment with regulatory and internal standards.", rating: "Proactive" },
+                    { text: "The governance framework is actively managed and refined through stakeholder input, with documented audit logs, compliance tracking reports, and governance reviews to ensure accountability and that oversight mechanisms address practical service delivery needs. Compliance violations are monitored and reported transparently to stakeholders.", rating: "Customer-led" },
+                    { text: "AI governance is fully integrated into enterprise wide compliance programmes, risk management strategies, and continuous assurance mechanisms. AI decisions and policies undergo regular assessment to ensure ongoing alignment with business goals, corporate governance frameworks and compliance with evolving standards.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Transparency, Accountability and Explainability (10.3), which statement best describes your organisation's current maturity level?",
+                hint: "Think about how clear and understandable your AI's decision-making processes are, and who is accountable for AI-driven actions.",
+                options: [
+                    { text: "The IT organisation has limited transparency regarding AI decision making, with no clear records of AI driven actions or decision processes. Stakeholders have minimal access to data or explanations, and lines of accountability are undefined.", rating: "Reactive" },
+                    { text: "Basic measures are established to make AI more transparent to internal stakeholders. Decision making processes are documented, with roles and responsibilities for AI oversight defined.", rating: "Proactive" },
+                    { text: "AI transparency includes explainability mechanisms and clear explanations of AI decision making processes, enabling end users and service stakeholders to understand AI decision making accountability, and to challenge AI decisions.", rating: "Customer-led" },
+                    { text: "AI explainability and accountability are embedded into ITSM workflows, with real time decision tracking dashboards, automated audit logs, and transparency reports.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding Ethical AI Standards and Fairness (10.4), which statement best describes your organisation's current maturity level?",
+                hint: "Consider the principles guiding your AI development and use, particularly concerning fairness, non-discrimination, and respect for human rights.",
+                options: [
+                    { text: "Ethical considerations for AI use are informal or non existent. There are no established guidelines for fairness, transparency, or accountability in decision making processes. Ethical issues are addressed reactively when they arise.", rating: "Reactive" },
+                    { text: "Ethical guidelines are defined and documented, incorporating standards for fairness, transparency, accountability in AI development, usage, and decision making processes. Guidelines include bias detection, fairness assessments, responsible AI usage, and alignment with the organisation's broader ethical values.", rating: "Proactive" },
+                    { text: "Ethical guidelines are refined through bias audits, fairness evaluations and stakeholder input, and actively communicate to customers and end users. Mechanisms are established for addressing ethical concerns raised by external parties and the alignment with evolving ethical AI practices.", rating: "Customer-led" },
+                    { text: "Ethical use of AI is embedded into the IT organisational strategy, with governance frameworks continually adapting to technological changes, regulatory updates, and industry best practices. Comprehensive procedures ensure ethical issues are proactively identified and addressed, fostering trust across all stakeholders.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Risk Management and Service Continuity (10.5), which statement best describes your organisation's current maturity level?",
+                hint: "Reflect on how your organisation identifies, assesses, and mitigates risks associated with AI operations and plans for AI-related disruptions.",
+                options: [
+                    { text: "Risk management measures for AI are informal or non existent. Risks are identified and addressed reactively, and there are no established procedures for monitoring or reporting risks.", rating: "Reactive" },
+                    { text: "Defined, documented and owned AI risk identification processes are in place incorporating procedures for monitoring and reporting risks. There is a documented risk register and contingency and service continuity plans, to minimise service disruptions caused by AI failures.", rating: "Proactive" },
+                    { text: "AI risk management is continually improved through simulated failure testing, real world risk data analysis and input from stakeholders, to ensure alignment with customer expectations and organisational priorities.", rating: "Customer-led" },
+                    { text: "AI risk management is embedded within the IT organisation's governance framework, incorporating adaptive processes to address evolving AI risk threats. Key activities include regular risk assessments, predictive analytics, dynamic failover strategies, enterprise wide monitoring, and robust contingency planning; all designed to ensure swift response to disruptions and maintain service resilience.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Security, Protection, and Privacy (10.6), which statement best describes your organisation's current maturity level?",
+                hint: "Consider how Al systems are secured against threats, how data is protected, and how user privacy is maintained.",
+                options: [
+                    { text: "Security measures for AI are basic and reactive, with minimal attention to safeguarding data or addressing vulnerabilities. Security assessments are performed only in response to incidents.", rating: "Reactive" },
+                    { text: "Defined, documented and owned AI security policies are in place incorporating procedures to safeguard AI systems and ensure data confidentiality. Regular AI security training and security assessments are in place, and vulnerabilities are systematically addressed to prevent future incidents.", rating: "Proactive" },
+                    { text: "AI security policies are continually improved through simulated testing, incident monitoring, vulnerability assessments and stakeholder feedback, ensuring that data and AI systems are comprehensively protected. Transparency measures allow stakeholders to understand how their data is safeguarded.", rating: "Customer-led" },
+                    { text: "AI security, protection, and privacy measures are embedded within the IT organisation's governance framework, supported by adaptive processes to counter evolving AI specific threats. Core activities include regular security assessments, automated threat detection, AI specific security hardening and enterprise wide cybersecurity programmes, to ensure resilience against emerging AI security threats.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Training and Awareness (10.7), which statement best describes your organisation's current maturity level?",
+                hint: "Reflect on the approach to AI training and education for employees operating AI systems.",
+                options: [
+                    { text: "Service Desk employees have minimal or no training on operating and maintaining AI systems and have limited awareness of their benefits and risks.", rating: "Reactive" },
+                    { text: "Structured and regularly scheduled training programmes are in place to equip Service Desk employees with the skills to operate and maintain AI systems. Training includes the benefits and risks of AI which are also communicated regularly through structured communication.", rating: "Proactive" },
+                    { text: "AI educational and awareness programmes are extended to business users incorporating scenario based learning and feedback from employees and stakeholders to help build trust in the role of AI in the organisation.", rating: "Customer-led" },
+                    { text: "AI education is a standard component of enterprise learning, embedded into onboarding, performance development, and role based certification programmes.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Testing and Validation (10.8), which statement best describes your organisation's current maturity level?",
+                hint: "Consider how thoroughly Al systems are tested and validated, involving users, before live deployment.",
+                options: [
+                    { text: "AI systems are deployed without formal testing or validation processes in place. Service Desk employees are not involved in validation and have little exposure to AI systems prior to go live.", rating: "Reactive" },
+                    { text: "Defined, documented and owned AI testing processes are in place. Testing opportunities are available to Service Desk staff through sandbox environments or pilot groups, to test and trial AI features before wider release.", rating: "Proactive" },
+                    { text: "End users are involved in structured user acceptance testing programmes that incorporate safe testing environments, defined testing objectives, real world simulations, and feedback loops that influence how AI performance is refined and integrated into business workflows.", rating: "Customer-led" },
+                    { text: "AI systems undergo continual risk based testing and evaluation incorporating performance, edge case handling, expected behaviours, regression testing, validation tracking, and test coverage reporting, usability checks, and sign off prior to deployment. Insights are used to inform workflow redesign, vendor decisions, and AI rollout strategies.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Data Governance (10.9), which statement best describes your organisation's current maturity level?",
+                hint: "Reflect on the policies for managing AI-relevant data, ensuring accuracy, integrity, accessibility, and compliance.",
+                options: [
+                    { text: "Data governance for AI is ad hoc or non existent. Data is used without defined standards for accuracy, quality, security, hygiene or ownership.", rating: "Reactive" },
+                    { text: "Documented and owned data governance policies are in place to ensure AI systems collect, use, and share data responsibly. The framework incorporates documented responsibilities and guidelines for data governance, with procedures for compliance and monitoring.", rating: "Proactive" },
+                    { text: "A data governance framework is in place that incorporates guidelines for data quality, accuracy, hygiene, privacy, sovereignty, bias mitigation, lineage, ownership, metadata, access control, and lifecycle management, to ensure the safe and effective use of AI. It is continually refined through stakeholder and customer input to ensure that data use aligns with expectations around privacy, security, and ownership.", rating: "Customer-led" },
+                    { text: "Data governance is fully integrated into enterprise AI strategy with automated validation, lineage tracking, audit trails, and sovereign compliant storage. Continual monitoring ensures adherence to evolving regulatory and ethical standards, with regular updates to governance practices.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Interoperability and Human Oversight (10.10), which statement best describes your organisation's current maturity level?",
+                hint: "Consider how Al systems integrate with existing processes and the extent of human oversight in Al decision-making.",
+                options: [
+                    { text: "AI systems operate in isolation, communication between systems is ad hoc, and there are no established integration protocols or human oversight.", rating: "Reactive" },
+                    { text: "Documented and owned standards for interoperability between AI systems and other organisational components are in place, incorporating guidelines for human in the loop (HITL) oversight, the identification of interoperability challenges during AI driven processes, and the use of feedback during AI decision making processes.", rating: "Proactive" },
+                    { text: "Interoperability standards are refined through collaboration with stakeholders to ensure AI systems meet organisational needs and customer expectations. Feedback and escalation pathways are actively used to guide human intervention in AI supported decisions.", rating: "Customer-led" },
+                    { text: "AI systems, human teams, and autonomous tools operate as a seamlessly integrated ecosystem, enabling real time collaboration, continual oversight, alignment with strategic objectives, and shared accountability across platforms.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Sustainability and Efficiency (10.11), which statement best describes your organisation's current maturity level?",
+                hint: "Reflect on how environmental impact and resource efficiency are considered in the lifecycle of your AI systems.",
+                options: [
+                    { text: "Sustainability and efficiency are not considered when deploying or procuring AI systems.", rating: "Reactive" },
+                    { text: "Documented and owned sustainability and efficiency practices are in place, with active integration of environmental considerations into the design, procurement, and operation of AI systems; including low energy hosting, compute usage optimisation, and responsible cloud resource allocation.", rating: "Proactive" },
+                    { text: "Co-developed sustainability and efficiency targets are in place and AI systems are evaluated against defined environmental and operational benchmarks. Operational practices are adapted to reduce emissions, waste, or resource intensity, based on performance data and feedback.", rating: "Customer-led" },
+                    { text: "Sustainability and efficiency are embedded into enterprise Environmental, Social, and Governance (ESG) and IT strategies. AI systems are continually monitored for energy and resource performance using automation. Insights are used to optimise operations and meet long term sustainability goals.", rating: "Business-led" }
+                ]
+            },
+            {
+                question: "Regarding AI Measurement and Performance Results (10.12), which statement best describes your organisation's current maturity level?",
+                hint: "Consider how the effectiveness, ROI, and business value of AI initiatives are defined, monitored, and evaluated.",
+                options: [
+                    { text: "KPIs and ROI are undefined or inconsistently measured for AI initiatives. Performance evaluations are anecdotal, lacking data driven analysis or alignment with organisational goals.", rating: "Reactive" },
+                    { text: "Documented and owned KPIs are in place to measure and track the performance and value of the AI systems in operation.", rating: "Proactive" },
+                    { text: "KPIs and ROI metrics are refined with input from stakeholders incorporating both quantitative and qualitative indicators. Metrics and performance tracking are formalised to align with business goals and user expectations.", rating: "Customer-led" },
+                    { text: "AI performance and value tracking is embedded in enterprise strategy. Real time dashboards and advanced analytics provide continual insight into business impact, informing optimisation and strategic decision making.", rating: "Business-led" }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+
+        const questionTextEl = document.getElementById('question-text');
+        const questionHintEl = document.getElementById('question-hint');
+        const optionsContainerEl = document.getElementById('options-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const questionCounterEl = document.getElementById('question-counter');
+        const progressBarFillEl = document.getElementById('progress-bar-fill');
+
+        const quizAreaEl = document.getElementById('quiz-area');
+        const resultsAreaEl = document.getElementById('results-area');
+        const overallRatingEl = document.getElementById('overall-rating');
+        const ratingExplanationEl = document.getElementById('rating-explanation');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const alertModal = document.getElementById('alertModal');
+        const alertMessage = document.getElementById('alertMessage');
+        const alertOkButton = document.getElementById('alertOkButton');
+
+        // --- Alert Modal Functions ---
+        function showAlert(message) {
+            alertMessage.textContent = message;
+            alertModal.style.display = 'flex'; // Use flex to center content
+            alertModal.style.alignItems = 'center';
+            alertModal.style.justifyContent = 'center';
+        }
+
+        alertOkButton.onclick = function() {
+            alertModal.style.display = 'none';
+        }
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            if (event.target == alertModal) {
+                alertModal.style.display = 'none';
+            }
+        }
+
+
+        // --- Maturity Level Explanations ---
+        const maturityExplanations = {
+            "Reactive": "A 'Reactive' maturity level suggests that AI adoption is often ad-hoc and inconsistent. Your organisation may benefit from establishing foundational AI strategies, governance, and ethical guidelines to build a more structured approach.",
+            "Proactive": "A 'Proactive' maturity level indicates that your organisation has begun to formalise its AI initiatives with documented strategies, governance, and risk management. The next steps involve deeper stakeholder engagement and refining processes based on feedback and performance.",
+            "Customer-led": "A 'Customer-led' maturity level shows a strong focus on aligning AI with customer and end-user needs, with active feedback loops and transparency. To advance, consider fully integrating AI into broader business strategies and automating oversight.",
+            "Business-led": "A 'Business-led' maturity level signifies that AI is deeply embedded within your organisation's strategic framework, driving transformation and continuous optimisation. Maintaining this level involves ongoing adaptation to new technologies and evolving best practices.",
+            "Mixed": "Your organisation's AI readiness shows a mixed maturity. This indicates strengths in multiple areas, but also opportunities for more consistent development across all criteria. Focus on harmonising these different aspects to achieve a more unified and advanced AI posture."
+        };
+
+
+        function loadQuestion(index) {
+            const question = quizData[index];
+            questionTextEl.textContent = question.question;
+            questionHintEl.textContent = question.hint;
+            optionsContainerEl.innerHTML = ''; // Clear previous options
+
+            question.options.forEach((option, optionIndex) => {
+                const button = document.createElement('button');
+                button.classList.add('w-full', 'text-left', 'p-3', 'sm:p-4', 'border', 'border-gray-300', 'rounded-md', 'hover:border-sdi-red', 'focus:outline-none', 'focus:ring-2', 'focus:ring-sdi-red', 'focus:ring-opacity-50', 'option-button', 'text-sm', 'sm:text-base');
+                button.textContent = option.text;
+                button.dataset.rating = option.rating; // Store rating for later
+                if (userAnswers[index] === option.rating) {
+                    button.classList.add('selected');
+                }
+                button.addEventListener('click', () => selectOption(index, option.rating, button));
+                optionsContainerEl.appendChild(button);
+            });
+
+            questionCounterEl.textContent = `Question ${index + 1} of ${quizData.length}`;
+            progressBarFillEl.style.width = `${((index + 1) / quizData.length) * 100}%`;
+
+            prevBtn.disabled = index === 0;
+            nextBtn.textContent = index === quizData.length - 1 ? 'Finish Quiz' : 'Next';
+        }
+
+        function selectOption(questionIndex, rating, selectedButton) {
+            userAnswers[questionIndex] = rating;
+            // Visually update selected option
+            const buttons = optionsContainerEl.querySelectorAll('.option-button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            selectedButton.classList.add('selected');
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion(currentQuestionIndex);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (userAnswers[currentQuestionIndex] === null) {
+                showAlert('Please select an answer before proceeding.');
+                return;
+            }
+
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion(currentQuestionIndex);
+            } else {
+                showResults();
+            }
+        });
+
+        function showResults() {
+            quizAreaEl.classList.add('hidden');
+            resultsAreaEl.classList.remove('hidden');
+
+            const ratingCounts = {};
+            userAnswers.forEach(answer => {
+                if (answer) { // Ensure answer is not null
+                    ratingCounts[answer] = (ratingCounts[answer] || 0) + 1;
+                }
+            });
+
+            let maxCount = 0;
+            let finalRatings = [];
+            for (const rating in ratingCounts) {
+                if (ratingCounts[rating] > maxCount) {
+                    maxCount = ratingCounts[rating];
+                    finalRatings = [rating];
+                } else if (ratingCounts[rating] === maxCount) {
+                    finalRatings.push(rating);
+                }
+            }
+            
+            let resultText = "";
+            let explanationKey = "";
+
+            if (finalRatings.length === 0) { // Should not happen if all questions answered
+                resultText = "No responses recorded.";
+                explanationKey = ""; // Or some default
+            } else if (finalRatings.length === 1) {
+                resultText = finalRatings[0];
+                explanationKey = finalRatings[0];
+            } else {
+                resultText = `Mixed (${finalRatings.join(' & ')})`;
+                explanationKey = "Mixed";
+                // Specific tie message as per brief
+                overallRatingEl.innerHTML = `Your organisation's AI readiness shows a mixed maturity, with key strengths in: <br/> <span class="font-bold text-sdi-red mt-1">${finalRatings.join(', ')}</span> areas.`;
+            }
+            
+            if (finalRatings.length === 1) {
+                 overallRatingEl.textContent = resultText;
+            } else if (finalRatings.length > 1) {
+                // The message is already set above for ties.
+            } else {
+                 overallRatingEl.textContent = "Could not determine rating."; // Fallback
+            }
+
+            ratingExplanationEl.textContent = maturityExplanations[explanationKey] || "Further analysis is recommended to understand your specific AI readiness profile.";
+        }
+        
+        restartBtn.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            userAnswers.fill(null);
+            resultsAreaEl.classList.add('hidden');
+            quizAreaEl.classList.remove('hidden');
+            loadQuestion(currentQuestionIndex);
+            overallRatingEl.textContent = "Calculating..."; // Reset result text
+            ratingExplanationEl.textContent = "Explanation loading..."; // Reset explanation
+        });
+
+        const contactBtn = document.getElementById('contact-consultant-btn');
+        const contactInfo = document.getElementById('contact-info');
+        contactBtn.addEventListener('click', () => {
+            // In a real scenario, this would redirect or open a contact modal/form
+            // For now, just show the placeholder text
+            contactInfo.classList.toggle('hidden');
+            showAlert('Thank you for your interest! Please reach out to us via our main contact channels. (This is a placeholder action)');
+        });
+
+
+        // Initial load
+        loadQuestion(currentQuestionIndex);
+    </script>
+</body>
+</html>
